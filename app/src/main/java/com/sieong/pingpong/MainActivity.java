@@ -2,12 +2,12 @@ package com.sieong.pingpong;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.IOException;
 
@@ -17,13 +17,13 @@ import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
 
-    private PingPongGame game;
     TextView hostScore;
     TextView guestScore;
     Button scoreHostButton;
     Button scoreGuestButton;
     TextView whoShouldServing;
     Button restartButton;
+    private PingPongGame game;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     Response response = client.newCall(request).execute();
                     Log.d("Myles", response.body().string());
-                }catch (IOException e){
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
                 return null;
