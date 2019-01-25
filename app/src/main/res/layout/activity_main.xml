@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.sieong.pingpong.MainActivity">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/hostScore"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="[scores host]"
+            android:textSize="24sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=":"
+            android:textSize="24sp" />
+
+        <TextView
+            android:id="@+id/guestScore"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="[scores guest]"
+            android:textSize="24sp" />
+    </LinearLayout>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="196dp"
+        android:background="@color/colorAccent"
+        android:id="@+id/scoreGuest"
+        android:text="Guest Scored" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="196dp"
+        android:id="@+id/scoreHost"
+        android:background="@color/colorPrimaryDark"
+        android:text="Host Scored" />
+
+    <TextView
+        android:id="@+id/whoShouldServe"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Who is serving"
+        android:textSize="24sp" />
+
+    <Button
+        android:id="@+id/restart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="restart" />
+</LinearLayout>
