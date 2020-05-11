@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'de.undercouch.download'
 
 android {
     compileSdkVersion 29
@@ -38,6 +39,14 @@ android {
         }
     }
 
+    aaptOptions {
+        noCompress "tflite"
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
     externalNativeBuild {
         cmake {
             path "CMakeLists.txt"
@@ -46,10 +55,11 @@ android {
 }
 
 dependencies {
-    //TODO myles extract these versions to root build.gradle
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.google.android.material:material:1.0.0'
+    implementation 'org.tensorflow:tensorflow-lite:2.1.0'
     implementation 'androidx.appcompat:appcompat:1.0.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.2'
-    implementation 'com.squareup.okhttp3:okhttp:3.4.2'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
     testImplementation 'junit:junit:4.12'
@@ -59,4 +69,32 @@ dependencies {
     androidTestImplementation 'androidx.annotation:annotation:1.0.0'
     androidTestImplementation 'androidx.test:rules:1.1.0'
     androidTestImplementation 'com.squareup.okhttp3:okhttp:3.4.2'
+}
+
+// import DownloadModels task
+ext.ASSET_DIR = projectDir.toString() + '/src/main/assets'
+ext.TMP_DIR = project.buildDir.toString() + '/downloads'
+
+task downloadZipFile(type: Download) {
+    src 'http://storage.googleapis.com/download.tensorflow.org/models/tflite/conv_actions_tflite.zip'
+    dest new File(buildDir, 'zips/')
+    overwrite false
+}
+
+task downloadAndUnzipFile(dependsOn: downloadZipFile, type: Copy) {
+    from zipTree(downloadZipFile.dest)
+    into ASSET_DIR
+}
+
+task extractModels(type: Copy) {
+    dependsOn downloadAndUnzipFile
+}
+
+tasks.whenTaskAdded { task ->
+    if (task.name == 'assembleDebug') {
+        task.dependsOn 'extractModels'
+    }
+    if (task.name == 'assembleRelease') {
+        task.dependsOn 'extractModels'
+    }
 }
