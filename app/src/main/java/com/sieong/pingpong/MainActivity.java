@@ -10,6 +10,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
@@ -31,6 +32,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
+
+import static java.util.Locale.UK;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -79,8 +82,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Memory-map the model file in Assets.
      */
-    private static MappedByteBuffer loadModelFile(AssetManager assets, String modelFilename)
-            throws IOException {
+    private static MappedByteBuffer loadModelFile(AssetManager assets, String modelFilename) throws IOException {
         AssetFileDescriptor fileDescriptor = assets.openFd(modelFilename);
         FileInputStream inputStream = new FileInputStream(fileDescriptor.getFileDescriptor());
         FileChannel fileChannel = inputStream.getChannel();
@@ -140,6 +142,22 @@ public class MainActivity extends AppCompatActivity {
         startRecording();
         startRecognition();
 
+        speak("This is a test of text to speech api");
+    }
+
+    TextToSpeech t1;
+
+    private void speak(String s) {
+        Log.d(TAG, "speak");
+
+        t1 = new TextToSpeech(getApplicationContext(), status -> {
+            Log.d(TAG, "onInit: status=" + status);
+
+            if (status != TextToSpeech.ERROR) {
+                t1.setLanguage(UK);
+                t1.speak(s, TextToSpeech.QUEUE_FLUSH, null);
+            }
+        });
     }
 
     private void initViews() {
@@ -356,7 +374,7 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             }
 
-                            Log.v(TAG, "recognize - new command index=" + (labelIndex -2));
+                            Log.v(TAG, "recognize - new command index=" + (labelIndex - 2));
                             switch (labelIndex - 2) {
                                 case 0:
                                     Toast.makeText(MainActivity.this, "Yes", Toast.LENGTH_SHORT).show();
