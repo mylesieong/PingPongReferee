@@ -3,6 +3,8 @@ build
 .gradle
 gradle
 app/.externalNativeBuild/
+app/app.iml
+app/*app.iml
 gradlew
 gradlew.bat
 .cxx

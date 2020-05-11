@@ -1,19 +1,11 @@
 package com.sieong.pingpong;
 
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
-
-import java.io.IOException;
-
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -23,7 +15,7 @@ public class MainActivity extends AppCompatActivity {
     Button scoreGuestButton;
     TextView whoShouldServing;
     Button restartButton;
-    private PingPongGame game;
+    private Game game;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,27 +23,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         initViews();
         restartGame();
-        toastNetworkResult();
-    }
-
-    private void toastNetworkResult() {
-        AsyncTask task = new AsyncTask() {
-            @Override
-            protected Object doInBackground(Object[] objects) {
-                OkHttpClient client = new OkHttpClient();
-                Request.Builder builder = new Request.Builder();
-                builder.url("https://reqres.in/api/users/2");
-                Request request = builder.build();
-                try {
-                    Response response = client.newCall(request).execute();
-                    Log.d("Myles", response.body().string());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                return null;
-            }
-        };
-        task.execute();
     }
 
     private void initViews() {
@@ -98,42 +69,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void restartGame() {
-        game = new PingPongGame();
-    }
-
-
-    private class PingPongGame {
-        int scoreHost;
-        int scoreGuest;
-
-        PingPongGame() {
-            scoreHost = 0;
-            scoreGuest = 0;
-        }
-
-        public int getScoreHost() {
-            return scoreHost;
-        }
-
-        public int getScoreGuest() {
-            return scoreGuest;
-        }
-
-        /* A is assumed to serve at the begining*/
-        public boolean shouldHostService() {
-            return isEvenNumber((scoreHost + scoreGuest) / 2);
-        }
-
-        private boolean isEvenNumber(int number) {
-            return (number % 2) == 0;
-        }
-
-        public void hostScores() {
-            scoreHost++;
-        }
-
-        public void guestScores() {
-            scoreGuest++;
-        }
+        game = new Game();
     }
 }
