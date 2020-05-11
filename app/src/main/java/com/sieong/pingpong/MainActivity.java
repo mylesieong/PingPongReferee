@@ -8,8 +8,6 @@ import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.widget.Button;
@@ -37,10 +35,6 @@ import static java.util.Locale.UK;
 
 public class MainActivity extends AppCompatActivity {
 
-    // Constants that control the behavior of the recognition code and model
-    // settings. See the audio recognition tutorial for a detailed explanation of
-    // all these, but you should customize them to match your training settings if
-    // you are running your own model.
     private static final int SAMPLE_RATE = 16000;
     private static final int SAMPLE_DURATION_MS = 1000;
     private static final int RECORDING_LENGTH = (int) (SAMPLE_RATE * SAMPLE_DURATION_MS / 1000);
@@ -51,37 +45,30 @@ public class MainActivity extends AppCompatActivity {
     private static final long MINIMUM_TIME_BETWEEN_SAMPLES_MS = 30;
     private static final String LABEL_FILENAME = "file:///android_asset/conv_actions_labels.txt";
     private static final String MODEL_FILENAME = "file:///android_asset/conv_actions_frozen.tflite";
-    // UI elements.
+
     private static final int REQUEST_RECORD_AUDIO = 13;
     private static final String TAG = MainActivity.class.getSimpleName();
     private final ReentrantLock recordingBufferLock = new ReentrantLock();
-    // Working variables.
-    short[] recordingBuffer = new short[RECORDING_LENGTH];
-    int recordingOffset = 0;
-    boolean shouldContinue = true;
-    boolean shouldContinueRecognition = true;
-    private TextView hostScore;
-    private TextView guestScore;
-    private Button scoreHostButton;
-    private Button scoreGuestButton;
-    private TextView whoShouldServing;
-    private Button restartButton;
+
+    private short[] recordingBuffer = new short[RECORDING_LENGTH];
+    private int recordingOffset = 0;
+    private boolean shouldContinue = true;
+    private boolean shouldContinueRecognition = true;
     private Game game;
     private Thread recordingThread;
     private Thread recognitionThread;
-    private List<String> labels = new ArrayList<String>();
+    private List<String> labels = new ArrayList<>();
     private List<String> displayedLabels = new ArrayList<>();
     private RecognizeCommands recognizeCommands = null;
     private Interpreter tfLite;
-    private long lastProcessingTimeMs;
-    private Handler handler = new Handler();
-    private TextView selectedTextView = null;
-    private HandlerThread backgroundThread;
-    private Handler backgroundHandler;
+    private TextToSpeech textToSpeech;
+    private TextView hostScore;
+    private TextView guestScore;
+    private TextView whoShouldServing;
+    private Button scoreHostButton;
+    private Button scoreGuestButton;
+    private Button restartButton;
 
-    /**
-     * Memory-map the model file in Assets.
-     */
     private static MappedByteBuffer loadModelFile(AssetManager assets, String modelFilename) throws IOException {
         AssetFileDescriptor fileDescriptor = assets.openFd(modelFilename);
         FileInputStream inputStream = new FileInputStream(fileDescriptor.getFileDescriptor());
@@ -97,67 +84,11 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         initViews();
         resetGame();
+        setupTensorFlowLite();
 
-        // Load the labels for the model, but only display those that don't start
-        // with an underscore.
-        String actualLabelFilename = LABEL_FILENAME.split("file:///android_asset/", -1)[1];
-        Log.i(TAG, "Reading labels from: " + actualLabelFilename);
-        BufferedReader br = null;
-        try {
-            br = new BufferedReader(new InputStreamReader(getAssets().open(actualLabelFilename)));
-            String line;
-            while ((line = br.readLine()) != null) {
-                labels.add(line);
-                if (line.charAt(0) != '_') {
-                    displayedLabels.add(line.substring(0, 1).toUpperCase() + line.substring(1));
-                }
-            }
-            br.close();
-        } catch (IOException e) {
-            throw new RuntimeException("Problem reading label file!", e);
-        }
-
-        // Set up an object to smooth recognition results to increase accuracy.
-        recognizeCommands =
-                new RecognizeCommands(
-                        labels,
-                        AVERAGE_WINDOW_DURATION_MS,
-                        DETECTION_THRESHOLD,
-                        SUPPRESSION_MS,
-                        MINIMUM_COUNT,
-                        MINIMUM_TIME_BETWEEN_SAMPLES_MS);
-
-        String actualModelFilename = MODEL_FILENAME.split("file:///android_asset/", -1)[1];
-        try {
-            tfLite = new Interpreter(loadModelFile(getAssets(), actualModelFilename));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        tfLite.resizeInput(0, new int[]{RECORDING_LENGTH, 1});
-        tfLite.resizeInput(1, new int[]{1});
-
-        // Start the recording and recognition threads.
         requestMicrophonePermission();
-        startRecording();
-        startRecognition();
 
-        speak("This is a test of text to speech api");
-    }
-
-    TextToSpeech t1;
-
-    private void speak(String s) {
-        Log.d(TAG, "speak");
-
-        t1 = new TextToSpeech(getApplicationContext(), status -> {
-            Log.d(TAG, "onInit: status=" + status);
-
-            if (status != TextToSpeech.ERROR) {
-                t1.setLanguage(UK);
-                t1.speak(s, TextToSpeech.QUEUE_FLUSH, null);
-            }
-        });
+        initTextToSpeech();
     }
 
     private void initViews() {
@@ -202,6 +133,46 @@ public class MainActivity extends AppCompatActivity {
         game = new Game();
     }
 
+    private void setupTensorFlowLite() {
+        // Load the labels for the model, but only display those that don't start
+        // with an underscore.
+        String actualLabelFilename = LABEL_FILENAME.split("file:///android_asset/", -1)[1];
+        Log.i(TAG, "Reading labels from: " + actualLabelFilename);
+        BufferedReader br = null;
+        try {
+            br = new BufferedReader(new InputStreamReader(getAssets().open(actualLabelFilename)));
+            String line;
+            while ((line = br.readLine()) != null) {
+                labels.add(line);
+                if (line.charAt(0) != '_') {
+                    displayedLabels.add(line.substring(0, 1).toUpperCase() + line.substring(1));
+                }
+            }
+            br.close();
+        } catch (IOException e) {
+            throw new RuntimeException("Problem reading label file!", e);
+        }
+
+        // Set up an object to smooth recognition results to increase accuracy.
+        recognizeCommands =
+                new RecognizeCommands(
+                        labels,
+                        AVERAGE_WINDOW_DURATION_MS,
+                        DETECTION_THRESHOLD,
+                        SUPPRESSION_MS,
+                        MINIMUM_COUNT,
+                        MINIMUM_TIME_BETWEEN_SAMPLES_MS);
+
+        String actualModelFilename = MODEL_FILENAME.split("file:///android_asset/", -1)[1];
+        try {
+            tfLite = new Interpreter(loadModelFile(getAssets(), actualModelFilename));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        tfLite.resizeInput(0, new int[]{RECORDING_LENGTH, 1});
+        tfLite.resizeInput(1, new int[]{1});
+    }
 
     private void requestMicrophonePermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -209,14 +180,26 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void initTextToSpeech() {
+        textToSpeech = new TextToSpeech(getApplicationContext(), status -> {
+            Log.d(TAG, "onInit: status=" + status);
+
+            if (status != TextToSpeech.ERROR) {
+                textToSpeech.setLanguage(UK);
+                speak("Initialization finished.");
+            }
+        });
+    }
+
+    private void speak(String words) {
+        textToSpeech.speak(words, TextToSpeech.QUEUE_ADD, null);
+    }
+
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        Log.d(TAG, "onRequestPermissionsResult");
-        if (requestCode == REQUEST_RECORD_AUDIO && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            Log.d(TAG, "onRequestPermissionsResult- allowed");
-            startRecording();
-            startRecognition();
-        }
+    protected void onResume() {
+        super.onResume();
+        startRecording();
+        startRecognition();
     }
 
     public synchronized void startRecording() {
@@ -228,14 +211,6 @@ public class MainActivity extends AppCompatActivity {
         shouldContinue = true;
         recordingThread = new Thread(() -> record());
         recordingThread.start();
-    }
-
-    public synchronized void stopRecording() {
-        if (recordingThread == null) {
-            return;
-        }
-        shouldContinue = false;
-        recordingThread = null;
     }
 
     private void record() {
@@ -310,14 +285,6 @@ public class MainActivity extends AppCompatActivity {
         recognitionThread.start();
     }
 
-    public synchronized void stopRecognition() {
-        if (recognitionThread == null) {
-            return;
-        }
-        shouldContinueRecognition = false;
-        recognitionThread = null;
-    }
-
     private void recognize() {
 
         Log.v(TAG, "recognize");
@@ -361,7 +328,6 @@ public class MainActivity extends AppCompatActivity {
             long currentTime = System.currentTimeMillis();
             final RecognizeCommands.RecognitionResult result =
                     recognizeCommands.processLatestResults(outputScores[0], currentTime);
-            lastProcessingTimeMs = new Date().getTime() - startTime;
             runOnUiThread(
                     () -> {
 
@@ -418,5 +384,38 @@ public class MainActivity extends AppCompatActivity {
         }
 
         Log.v(TAG, "End recognition");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        stopRecognition();
+        stopRecording();
+    }
+
+    public synchronized void stopRecording() {
+        if (recordingThread == null) {
+            return;
+        }
+        shouldContinue = false;
+        recordingThread = null;
+    }
+
+    public synchronized void stopRecognition() {
+        if (recognitionThread == null) {
+            return;
+        }
+        shouldContinueRecognition = false;
+        recognitionThread = null;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        Log.d(TAG, "onRequestPermissionsResult");
+        if (requestCode == REQUEST_RECORD_AUDIO && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            Log.d(TAG, "onRequestPermissionsResult- allowed");
+            startRecording();
+            startRecognition();
+        }
     }
 }
