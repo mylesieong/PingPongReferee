@@ -1,7 +1,6 @@
 package com.sieong.pingpong;
 
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -22,7 +21,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initViews();
-        restartGame();
+        resetGame();
     }
 
     private void initViews() {
@@ -33,32 +32,27 @@ public class MainActivity extends AppCompatActivity {
         whoShouldServing = findViewById(R.id.whoShouldServe);
         restartButton = findViewById(R.id.restart);
 
-        scoreHostButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                game.hostScores();
-                updateUI();
-            }
-        });
-
-        scoreGuestButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                game.guestScores();
-                updateUI();
-            }
-        });
-
-        restartButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                restartGame();
-                updateUI();
-            }
-        });
+        scoreHostButton.setOnClickListener(v -> handleHostScores());
+        scoreGuestButton.setOnClickListener(v -> handleGuestScores());
+        restartButton.setOnClickListener(v -> handleRestart());
     }
 
-    private void updateUI() {
+    private void handleRestart() {
+        resetGame();
+        refreshUI();
+    }
+
+    private void handleGuestScores() {
+        game.guestScores();
+        refreshUI();
+    }
+
+    private void handleHostScores() {
+        game.hostScores();
+        refreshUI();
+    }
+
+    private void refreshUI() {
         hostScore.setText(String.valueOf(game.getScoreHost()));
         guestScore.setText(String.valueOf(game.getScoreGuest()));
         if (game.shouldHostService()) {
@@ -68,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void restartGame() {
+    private void resetGame() {
         game = new Game();
     }
 }
