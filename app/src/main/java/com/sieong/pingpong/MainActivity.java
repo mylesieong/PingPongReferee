@@ -111,26 +111,33 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void handleGuestScores() {
-        game.guestScores();
-        speak("Guest scores");
-        speak(game.toString());
-        if (game.isGameOver()){
-            speak("Game is over.");
-        } else {
-            speak(game.shouldHostService() ? "Host serves" : "Guest serves");
+        if (game.isGameOver()) {
+            return;
         }
+
+        game.guestScores();
+        announceGameStatus(Game.PlayerRole.GUEST);
         refreshUI();
     }
 
-    private void handleHostScores() {
-        game.hostScores();
-        speak("Host scores");
-        speak(game.toString());
-        if (game.isGameOver()){
-            speak("Game is over.");
+    private void announceGameStatus(Game.PlayerRole scoredPlayer) {
+        String message = scoredPlayer == Game.PlayerRole.GUEST ? "Guest scores." : "Host scores.";
+        message += game.toString();
+        if (game.isGameOver()) {
+            message += "Game is over.";
         } else {
-            speak(game.shouldHostService() ? "Host serves" : "Guest serves");
+            message += game.shouldHostService() ? "Host serves." : "Guest serves.";
         }
+        speak(message);
+    }
+
+    private void handleHostScores() {
+        if (game.isGameOver()) {
+            return;
+        }
+
+        game.hostScores();
+        announceGameStatus(Game.PlayerRole.HOST);
         refreshUI();
     }
 

@@ -17,11 +17,13 @@ class Game {
     }
 
     fun hostScores() {
+        if (isGameOver()) return
         scoreHost++
         lastAction = "HOST"
     }
 
     fun guestScores() {
+        if (isGameOver()) return
         scoreGuest++
         lastAction = "GUEST"
     }
@@ -40,5 +42,7 @@ class Game {
         return isPointsExceedTotalPoint && !isInDeuce
     }
 
-    override fun toString() = "Host $scoreHost to guest $scoreGuest"
+    override fun toString() = "Host $scoreHost to guest $scoreGuest."
+
+    enum class PlayerRole { HOST, GUEST }
 }
