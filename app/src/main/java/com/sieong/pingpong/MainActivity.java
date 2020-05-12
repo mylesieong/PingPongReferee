@@ -107,25 +107,50 @@ public class MainActivity extends AppCompatActivity {
     private void handleRestart() {
         resetGame();
         refreshUI();
+        speak("Restarting");
     }
 
     private void handleGuestScores() {
         game.guestScores();
+        speak("Guest scores");
+        speak(game.toString());
+        if (game.isGameOver()){
+            speak("Game is over.");
+        } else {
+            speak(game.shouldHostService() ? "Host serves" : "Guest serves");
+        }
         refreshUI();
     }
 
     private void handleHostScores() {
         game.hostScores();
+        speak("Host scores");
+        speak(game.toString());
+        if (game.isGameOver()){
+            speak("Game is over.");
+        } else {
+            speak(game.shouldHostService() ? "Host serves" : "Guest serves");
+        }
         refreshUI();
     }
 
     private void refreshUI() {
         hostScore.setText(String.valueOf(game.getScoreHost()));
         guestScore.setText(String.valueOf(game.getScoreGuest()));
-        if (game.shouldHostService()) {
-            whoShouldServing.setText("Host should serve");
+
+        if (game.isGameOver()) {
+            whoShouldServing.setText("Game over");
+            scoreGuestButton.setEnabled(false);
+            scoreHostButton.setEnabled(false);
+
         } else {
-            whoShouldServing.setText("Guest should serve");
+            if (game.shouldHostService()) {
+                whoShouldServing.setText("Host should serve");
+            } else {
+                whoShouldServing.setText("Guest should serve");
+            }
+            scoreGuestButton.setEnabled(true);
+            scoreHostButton.setEnabled(true);
         }
     }
 
@@ -192,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void speak(String words) {
-        textToSpeech.speak(words, TextToSpeech.QUEUE_ADD, null);
+        textToSpeech.speak(words, TextToSpeech.QUEUE_FLUSH, null);
     }
 
     @Override
@@ -274,14 +299,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         shouldContinueRecognition = true;
-        recognitionThread =
-                new Thread(
-                        new Runnable() {
-                            @Override
-                            public void run() {
-                                recognize();
-                            }
-                        });
+        recognitionThread = new Thread(() -> recognize());
         recognitionThread.start();
     }
 
@@ -344,6 +362,7 @@ public class MainActivity extends AppCompatActivity {
                             switch (labelIndex - 2) {
                                 case 0:
                                     Toast.makeText(MainActivity.this, "Yes", Toast.LENGTH_SHORT).show();
+                                    handleHostScores();
                                     break;
                                 case 1:
                                     Toast.makeText(MainActivity.this, "No", Toast.LENGTH_SHORT).show();
@@ -359,12 +378,14 @@ public class MainActivity extends AppCompatActivity {
                                     break;
                                 case 5:
                                     Toast.makeText(MainActivity.this, "Right", Toast.LENGTH_SHORT).show();
+                                    handleGuestScores();
                                     break;
                                 case 6:
                                     Toast.makeText(MainActivity.this, "On", Toast.LENGTH_SHORT).show();
                                     break;
                                 case 7:
                                     Toast.makeText(MainActivity.this, "Off", Toast.LENGTH_SHORT).show();
+                                    handleCancelLastPoint();
                                     break;
                                 case 8:
                                     Toast.makeText(MainActivity.this, "Stop", Toast.LENGTH_SHORT).show();
@@ -384,6 +405,14 @@ public class MainActivity extends AppCompatActivity {
         }
 
         Log.v(TAG, "End recognition");
+    }
+
+    private void handleCancelLastPoint() {
+        game.cancelLastPoint();
+        speak("Cancel last point");
+        speak(game.toString());
+        speak(game.shouldHostService() ? "Host serves" : "Guest serves");
+        refreshUI();
     }
 
     @Override

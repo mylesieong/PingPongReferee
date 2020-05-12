@@ -1,20 +1,44 @@
 package com.sieong.pingpong
 
+import kotlin.math.abs
+
 class Game {
+    private val TOTAL_POINTS = 11
+
     var scoreHost = 0
     var scoreGuest = 0
+    var lastAction: String? = null
 
-    /* A is assumed to serve at the beginning*/
-    fun shouldHostService() = isEvenNumber((scoreHost + scoreGuest) / 2)
-
-    private fun isEvenNumber(number: Int) = number % 2 == 0
+    /**
+     * Host should serve at the beginning
+     */
+    fun shouldHostService(): Boolean {
+        return ((scoreHost + scoreGuest) / 2) % 2 == 0
+    }
 
     fun hostScores() {
         scoreHost++
+        lastAction = "HOST"
     }
 
     fun guestScores() {
         scoreGuest++
+        lastAction = "GUEST"
     }
 
+    fun cancelLastPoint() {
+        if (lastAction == "HOST") {
+            scoreHost--
+        } else if (lastAction == "GUEST") {
+            scoreGuest--
+        }
+    }
+
+    fun isGameOver(): Boolean {
+        val isPointsExceedTotalPoint = (scoreHost >= TOTAL_POINTS) || (scoreGuest >= TOTAL_POINTS)
+        val isInDeuce = isPointsExceedTotalPoint && abs(scoreGuest - scoreHost) < 2
+        return isPointsExceedTotalPoint && !isInDeuce
+    }
+
+    override fun toString() = "Host $scoreHost to guest $scoreGuest"
 }

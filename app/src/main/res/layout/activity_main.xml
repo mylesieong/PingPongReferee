@@ -15,47 +15,50 @@
             android:id="@+id/hostScore"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="[scores host]"
-            android:textSize="24sp" />
+            android:text=" - "
+            android:textSize="64sp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=":"
-            android:textSize="24sp" />
+            android:textSize="64sp" />
 
         <TextView
             android:id="@+id/guestScore"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="[scores guest]"
-            android:textSize="24sp" />
+            android:text=" - "
+            android:textSize="64sp" />
     </LinearLayout>
 
     <Button
-        android:layout_width="match_parent"
-        android:layout_height="196dp"
-        android:background="@color/colorAccent"
         android:id="@+id/scoreGuest"
-        android:text="Guest Scored" />
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:background="@color/colorAccent"
+        android:text="Guest Scored"
+        android:textSize="32sp" />
 
     <Button
-        android:layout_width="match_parent"
-        android:layout_height="196dp"
         android:id="@+id/scoreHost"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
         android:background="@color/colorPrimaryDark"
-        android:text="Host Scored" />
+        android:text="Host Scored"
+        android:textSize="32sp" />
 
     <TextView
         android:id="@+id/whoShouldServe"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Who is serving"
-        android:textSize="24sp" />
+        android:text="Host is serving"
+        android:textSize="32sp" />
 
     <Button
         android:id="@+id/restart"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="restart" />
+        android:text="restart"
+        android:textSize="48sp" />
 </LinearLayout>
