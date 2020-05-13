@@ -7,66 +7,83 @@
     tools:context="com.sieong.pingpong.MainActivity">
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
         <TextView
             android:id="@+id/host_score"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text=" - "
+            android:layout_weight="1"
+            android:text="0"
+            android:textAlignment="center"
             android:textSize="64sp" />
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text=":"
+            android:layout_weight="1"
+            android:text="-"
+            android:textAlignment="center"
             android:textSize="64sp" />
 
         <TextView
             android:id="@+id/guest_score"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text=" - "
+            android:layout_weight="1"
+            android:text="0"
+            android:textAlignment="center"
             android:textSize="64sp" />
     </LinearLayout>
 
-    <Button
-        android:id="@+id/score_guest"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="150dp"
-        android:background="@color/colorAccent"
-        android:text="Guest Scored"
-        android:textSize="32sp" />
+        android:orientation="horizontal">
 
-    <Button
-        android:id="@+id/score_host"
-        android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:background="@color/colorPrimaryDark"
-        android:text="Host Scored"
-        android:textSize="32sp" />
+        <Button
+            android:id="@+id/score_host"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@color/colorPrimaryDark"
+            android:text="Host Scored"
+            android:textSize="32sp" />
+
+        <Button
+            android:id="@+id/score_guest"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@color/colorAccent"
+            android:text="Guest Scored"
+            android:textSize="32sp" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/who_should_serve"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Host is serving"
+        android:textAlignment="center"
+
         android:textSize="32sp" />
 
     <Button
         android:id="@+id/restart"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="restart"
         android:textSize="48sp" />
 
     <TextView
         android:id="@+id/recognizer_status"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text=" N/A "
+        android:textAlignment="center"
         android:textSize="24sp" />
 
 </LinearLayout>
