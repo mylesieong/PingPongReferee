@@ -3,11 +3,13 @@ package com.sieong.pingpong
 import kotlin.math.abs
 
 class Game {
-    private val TOTAL_POINTS = 11
+    companion object {
+        private const val TOTAL_POINTS = 11
+    }
 
     var scoreHost = 0
     var scoreGuest = 0
-    var lastAction: String? = null
+    var lastScoredPlayer: PlayerRole? = null
 
     /**
      * Host should serve at the beginning
@@ -19,19 +21,19 @@ class Game {
     fun hostScores() {
         if (isGameOver()) return
         scoreHost++
-        lastAction = "HOST"
+        lastScoredPlayer = PlayerRole.HOST
     }
 
     fun guestScores() {
         if (isGameOver()) return
         scoreGuest++
-        lastAction = "GUEST"
+        lastScoredPlayer = PlayerRole.GUEST
     }
 
     fun cancelLastPoint() {
-        if (lastAction == "HOST") {
+        if (lastScoredPlayer == PlayerRole.HOST) {
             scoreHost--
-        } else if (lastAction == "GUEST") {
+        } else if (lastScoredPlayer == PlayerRole.GUEST) {
             scoreGuest--
         }
     }
