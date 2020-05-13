@@ -12,7 +12,7 @@
         android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/hostScore"
+            android:id="@+id/host_score"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=" - "
@@ -25,7 +25,7 @@
             android:textSize="64sp" />
 
         <TextView
-            android:id="@+id/guestScore"
+            android:id="@+id/guest_score"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=" - "
@@ -33,7 +33,7 @@
     </LinearLayout>
 
     <Button
-        android:id="@+id/scoreGuest"
+        android:id="@+id/score_guest"
         android:layout_width="match_parent"
         android:layout_height="150dp"
         android:background="@color/colorAccent"
@@ -41,7 +41,7 @@
         android:textSize="32sp" />
 
     <Button
-        android:id="@+id/scoreHost"
+        android:id="@+id/score_host"
         android:layout_width="match_parent"
         android:layout_height="150dp"
         android:background="@color/colorPrimaryDark"
@@ -49,7 +49,7 @@
         android:textSize="32sp" />
 
     <TextView
-        android:id="@+id/whoShouldServe"
+        android:id="@+id/who_should_serve"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Host is serving"
@@ -61,4 +61,12 @@
         android:layout_height="wrap_content"
         android:text="restart"
         android:textSize="48sp" />
+
+    <TextView
+        android:id="@+id/recognizer_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=" N/A "
+        android:textSize="24sp" />
+
 </LinearLayout>

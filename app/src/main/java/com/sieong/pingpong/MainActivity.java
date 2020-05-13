@@ -9,6 +9,7 @@ import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
@@ -29,6 +30,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static java.util.Locale.UK;
@@ -68,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
     private Button scoreHostButton;
     private Button scoreGuestButton;
     private Button restartButton;
+    private TextView recognizerStatus;
 
     private static MappedByteBuffer loadModelFile(AssetManager assets, String modelFilename) throws IOException {
         AssetFileDescriptor fileDescriptor = assets.openFd(modelFilename);
@@ -85,19 +88,18 @@ public class MainActivity extends AppCompatActivity {
         initViews();
         resetGame();
         setupTensorFlowLite();
-
         requestMicrophonePermission();
-
         initTextToSpeech();
     }
 
     private void initViews() {
-        hostScore = findViewById(R.id.hostScore);
-        guestScore = findViewById(R.id.guestScore);
-        scoreHostButton = findViewById(R.id.scoreHost);
-        scoreGuestButton = findViewById(R.id.scoreGuest);
-        whoShouldServing = findViewById(R.id.whoShouldServe);
+        hostScore = findViewById(R.id.host_score);
+        guestScore = findViewById(R.id.guest_score);
+        scoreHostButton = findViewById(R.id.score_host);
+        scoreGuestButton = findViewById(R.id.score_guest);
+        whoShouldServing = findViewById(R.id.who_should_serve);
         restartButton = findViewById(R.id.restart);
+        recognizerStatus = findViewById(R.id.recognizer_status);
 
         scoreHostButton.setOnClickListener(v -> handleHostScores());
         scoreGuestButton.setOnClickListener(v -> handleGuestScores());
@@ -218,20 +220,44 @@ public class MainActivity extends AppCompatActivity {
 
             if (status != TextToSpeech.ERROR) {
                 textToSpeech.setLanguage(UK);
+                textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+                    @Override
+                    public void onStart(String utteranceId) {
+                        Log.d(TAG, "UtteranceProgressListener: onStart");
+                        recognizerStops();
+                    }
+
+                    @Override
+                    public void onDone(String utteranceId) {
+                        Log.d(TAG, "UtteranceProgressListener: onDone");
+                        recognizerStarts();
+                    }
+
+                    @Override
+                    public void onError(String utteranceId) {
+                        Log.d(TAG, "UtteranceProgressListener: onError");
+                    }
+                });
                 speak("Initialization finished.");
             }
         });
     }
 
     private void speak(String words) {
-        textToSpeech.speak(words, TextToSpeech.QUEUE_FLUSH, null);
+        String utteranceId = UUID.randomUUID().toString();
+        textToSpeech.speak(words, TextToSpeech.QUEUE_FLUSH, null, utteranceId);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        recognizerStarts();
+    }
+
+    private void recognizerStarts() {
         startRecording();
         startRecognition();
+        recognizerStatus.setText("Recognizer is working...");
     }
 
     public synchronized void startRecording() {
@@ -425,8 +451,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        recognizerStops();
+    }
+
+    private void recognizerStops() {
         stopRecognition();
         stopRecording();
+        recognizerStatus.setText("Recognizer stopped.");
     }
 
     public synchronized void stopRecording() {
@@ -450,8 +481,7 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "onRequestPermissionsResult");
         if (requestCode == REQUEST_RECORD_AUDIO && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             Log.d(TAG, "onRequestPermissionsResult- allowed");
-            startRecording();
-            startRecognition();
+            recognizerStarts();
         }
     }
 }

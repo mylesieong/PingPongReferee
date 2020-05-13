@@ -9,7 +9,7 @@ android {
     defaultConfig {
         applicationId "com.sieong.pingpong"
 
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 29
 
         versionCode 1
