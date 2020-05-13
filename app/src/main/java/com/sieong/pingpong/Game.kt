@@ -12,10 +12,12 @@ class Game {
     var lastScoredPlayer: PlayerRole? = null
 
     /**
-     * Host should serve at the beginning
+     * Tell who should serve next. For convention, host should always serve at the beginning of a game.
      */
-    fun shouldHostService(): Boolean {
-        return ((scoreHost + scoreGuest) / 2) % 2 == 0
+    fun whoShouldServeNext() = if (!isInDeuce()) {
+        if (((scoreHost + scoreGuest) / 2) % 2 == 0) PlayerRole.HOST else PlayerRole.GUEST
+    } else {
+        if ((scoreHost + scoreGuest) % 2 == 0) PlayerRole.HOST else PlayerRole.GUEST
     }
 
     fun hostScores() {
@@ -39,12 +41,31 @@ class Game {
     }
 
     fun isGameOver(): Boolean {
+        //TODO remove duplicated code here and in isInDuece
         val isPointsExceedTotalPoint = (scoreHost >= TOTAL_POINTS) || (scoreGuest >= TOTAL_POINTS)
-        val isInDeuce = isPointsExceedTotalPoint && abs(scoreGuest - scoreHost) < 2
-        return isPointsExceedTotalPoint && !isInDeuce
+        return isPointsExceedTotalPoint && !isInDeuce()
     }
 
-    override fun toString() = "Host $scoreHost to guest $scoreGuest."
+    fun isInDeuce(): Boolean {
+        val isPointsExceedTotalPoint = (scoreHost >= TOTAL_POINTS) || (scoreGuest >= TOTAL_POINTS)
+        return isPointsExceedTotalPoint && abs(scoreGuest - scoreHost) < 2
+    }
+
+    override fun toString(): String {
+        return if (scoreGuest == 10 && scoreHost == 10) {
+            "Deuce."
+
+        } else if (isInDeuce()) {
+            if (scoreHost == scoreGuest) {
+                "Even."
+            } else {
+                if (scoreHost > scoreGuest) "Host's advantage." else "Guest's advantage."
+            }
+
+        } else {
+            "Host $scoreHost to guest $scoreGuest."
+        }
+    }
 
     enum class PlayerRole { HOST, GUEST }
 }

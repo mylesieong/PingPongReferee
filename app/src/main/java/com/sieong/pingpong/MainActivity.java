@@ -128,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
         if (game.isGameOver()) {
             message += "Game is over.";
         } else {
-            message += game.shouldHostService() ? "Host serves." : "Guest serves.";
+            message += game.whoShouldServeNext() == Game.PlayerRole.HOST ? "Host serves." : "Guest serves.";
         }
         speak(message);
     }
@@ -153,11 +153,7 @@ public class MainActivity extends AppCompatActivity {
             scoreHostButton.setEnabled(false);
 
         } else {
-            if (game.shouldHostService()) {
-                whoShouldServing.setText("Host should serve");
-            } else {
-                whoShouldServing.setText("Guest should serve");
-            }
+            whoShouldServing.setText(game.whoShouldServeNext() == Game.PlayerRole.HOST ? "Host should serve" : "Guest should serve");
             scoreGuestButton.setEnabled(true);
             scoreHostButton.setEnabled(true);
         }
@@ -444,7 +440,7 @@ public class MainActivity extends AppCompatActivity {
         game.cancelLastPoint();
         speak("Cancel last point");
         speak(game.toString());
-        speak(game.shouldHostService() ? "Host serves" : "Guest serves");
+        speak(game.whoShouldServeNext() == Game.PlayerRole.HOST ? "Host serves" : "Guest serves");
         refreshUI();
     }
 
