@@ -395,26 +395,26 @@ public class MainActivity extends AppCompatActivity {
                                     break;
                                 case 1:
                                     Toast.makeText(MainActivity.this, "No", Toast.LENGTH_SHORT).show();
+                                    handleGuestScores();
                                     break;
                                 case 2:
                                     Toast.makeText(MainActivity.this, "Up", Toast.LENGTH_SHORT).show();
                                     break;
                                 case 3:
                                     Toast.makeText(MainActivity.this, "Down", Toast.LENGTH_SHORT).show();
+                                    handleCancelLastPoint();
                                     break;
                                 case 4:
                                     Toast.makeText(MainActivity.this, "Left", Toast.LENGTH_SHORT).show();
                                     break;
                                 case 5:
                                     Toast.makeText(MainActivity.this, "Right", Toast.LENGTH_SHORT).show();
-                                    handleGuestScores();
                                     break;
                                 case 6:
                                     Toast.makeText(MainActivity.this, "On", Toast.LENGTH_SHORT).show();
                                     break;
                                 case 7:
                                     Toast.makeText(MainActivity.this, "Off", Toast.LENGTH_SHORT).show();
-                                    handleCancelLastPoint();
                                     break;
                                 case 8:
                                     Toast.makeText(MainActivity.this, "Stop", Toast.LENGTH_SHORT).show();
