@@ -46,9 +46,15 @@ class Game {
         return isPointsExceedTotalPoint && !isInDeuce()
     }
 
-    fun isInDeuce(): Boolean {
+    private fun isInDeuce(): Boolean {
         val isPointsExceedTotalPoint = (scoreHost >= TOTAL_POINTS) || (scoreGuest >= TOTAL_POINTS)
         return isPointsExceedTotalPoint && abs(scoreGuest - scoreHost) < 2
+    }
+
+    fun reset() {
+        scoreGuest = 0
+        scoreHost = 0
+        lastScoredPlayer = null
     }
 
     override fun toString(): String {
