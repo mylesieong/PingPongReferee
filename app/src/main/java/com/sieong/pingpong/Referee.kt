@@ -31,7 +31,7 @@ class Referee(context: Context) {
         private const val SAMPLE_DURATION_MS = 1000
         private const val RECORDING_LENGTH = (SAMPLE_RATE * SAMPLE_DURATION_MS / 1000)
         private const val AVERAGE_WINDOW_DURATION_MS: Long = 1000
-        private const val DETECTION_THRESHOLD = 0.50f
+        private const val DETECTION_THRESHOLD = 0.40f
         private const val SUPPRESSION_MS = 1500
         private const val MINIMUM_COUNT = 3
         private const val MINIMUM_TIME_BETWEEN_SAMPLES_MS: Long = 30
@@ -56,6 +56,7 @@ class Referee(context: Context) {
     private var voiceCommandMode = false
     private var gameSummaryMode = false
     private var textToSpeech: TextToSpeech? = null
+    private var lastScoreTimestamp: Long = -1
 
     init {
         setupTensorFlowLite(context)
@@ -339,23 +340,33 @@ class Referee(context: Context) {
                 when (labelIndex - 2) {
                     0 -> {
                         Log.d(TAG, "recognize - Yes")
-                        hostScored()
+                        if (!isTooSoonForAnotherScore()) {
+                            hostScored()
+                            lastScoreTimestamp = System.currentTimeMillis()
+                        } else {
+                            Log.d(TAG, " recognize- Too soon for another score. Ignoring.")
+                        }
                     }
-                    1 -> {
-                        Log.d(TAG, "recognize - No")
-                        guestScored()
-                    }
+                    1 -> Log.d(TAG, "recognize - No")
                     2 -> Log.d(TAG, "recognize - Up")
-                    3 -> {
-                        Log.d(TAG, "recognize - Down")
-                        cancelLastPoint()
-                    }
+                    3 -> Log.d(TAG, "recognize - Down")
                     4 -> Log.d(TAG, "recognize - Left")
                     5 -> Log.d(TAG, "recognize - Right")
                     6 -> Log.d(TAG, "recognize - On")
                     7 -> Log.d(TAG, "recognize - Off")
-                    8 -> Log.d(TAG, "recognize - Stop")
-                    9 -> Log.d(TAG, "recognize - Go")
+                    8 -> {
+                        Log.d(TAG, "recognize - Stop")
+                        cancelLastPoint()
+                    }
+                    9 -> {
+                        Log.d(TAG, "recognize - Go")
+                        if (!isTooSoonForAnotherScore()) {
+                            guestScored()
+                            lastScoreTimestamp = System.currentTimeMillis()
+                        } else {
+                            Log.d(TAG, " recognize- Too soon for another score. Ignoring.")
+                        }
+                    }
                 }
             }
 
@@ -365,6 +376,13 @@ class Referee(context: Context) {
             }
         }
         Log.v(TAG, "End recognition")
+    }
+
+    private fun isTooSoonForAnotherScore(): Boolean {
+        val now = System.currentTimeMillis()
+        val duration = now - lastScoreTimestamp
+        Log.d(TAG, " isTooSoonForAnotherScore - duration = $duration")
+        return duration < 6000
     }
 
     @Synchronized

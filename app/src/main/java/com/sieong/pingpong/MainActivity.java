@@ -93,7 +93,12 @@ public class MainActivity extends AppCompatActivity implements Referee.Listener 
 
     @Override
     public void onGameUpdated(@NotNull Game game) {
-        refreshUI(game);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                refreshUI(game);
+            }
+        });
     }
 
     private void refreshUI(Game game) {
